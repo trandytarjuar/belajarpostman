@@ -1,7 +1,17 @@
 import React, {useState, PureComponent} from 'react';
 import {View, Text, TextInput, TouchableHighlight,Button, StyleSheet, TouchableOpacity, Image} from 'react-native';
-import axios from 'axios'
+import axios from 'axios';
+// import ImagePicker from 'react-native-image-picker'
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import AppConfig from '../../constant';
 
+const options = {
+  title: 'select a photo',
+  chooseFromLibraryButtonTitle:'choose photo',
+  mediaType: 'photo',
+  // includeBase64: true,
+  quality: 1
+}
 
 
 const TambahData = ({navigation}) => {
@@ -9,6 +19,7 @@ const TambahData = ({navigation}) => {
         const [nama, setNama] =useState("");
         const [alamat, setAlamat] =useState("");
         const [jurusan, setJurusan] =useState("");
+        const [image, setImage] =useState("");
     
 
 
@@ -20,7 +31,8 @@ const TambahData = ({navigation}) => {
             data.append('nama', nama);
             data.append('alamat', alamat);
             data.append('jurusan', jurusan);
-            axios.post("http://192.168.1.5/backend_CRUD_ReactNative/api/mahasiswas/tambah", data, {
+            data.append('image', image);
+            axios.post(AppConfig.BASE_URL+ "backend_CRUD_ReactNative/api/mahasiswas/tambah", data, {
                 headers: {
                     'content-type': 'multipart/form-data'
                 }
@@ -30,6 +42,7 @@ const TambahData = ({navigation}) => {
                       setNama("");
                       setAlamat("");
                       setJurusan("");
+                      setImage("");
                     })
                     .catch(function (error) {
                       alert(error)
@@ -37,12 +50,34 @@ const TambahData = ({navigation}) => {
                     });
         }
 
+      const choosePicture = () => {
+          launchImageLibrary(options, (response) => {
+            if (response.uri) {
+              setImage(response)
+              // this.setState({ image: response });
+            }
+          });
+        };
+      // const { image } = this.state;
+
     return (
         <View>
                 <Text style={{textAlign: 'center', margin: 10}}> Form Input Mahasiswa</Text>
                 <TextInput placeholder="Masukkan Nama" style={{borderWidth: 1, marginBottom: 5}} value={nama} onChangeText={(value) => setNama(value)}></TextInput>
                 <TextInput placeholder="Masukkan alamat" style={{borderWidth: 1, marginBottom: 5}}value={alamat} onChangeText={(value) => setAlamat(value)}></TextInput>
                 <TextInput placeholder="Masukkan Jurusan" style={{borderWidth: 1, marginBottom: 5}}value={jurusan} onChangeText={(value) => setJurusan(value)}></TextInput>
+                
+                 <Image
+                    source={{ uri: image.uri }}
+                    style={{ width: 300, height: 300 }}
+                  />
+                <TouchableHighlight
+                        activeOpacity={1}
+                        onPress={choosePicture}>
+                        <Text numberOfLines={1} style={{marginTop: 5, fontSize: 18, fontWeight: 'bold'}}>
+                          Change Profile Image
+                        </Text>
+                    </TouchableHighlight>
                 <TouchableHighlight onPress={simpan} style={styles.btnSimpan}>
                 <Text style={styles.textBtn} >Simpan</Text>
                 </TouchableHighlight>
